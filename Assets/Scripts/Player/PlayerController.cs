@@ -17,6 +17,7 @@ public class PlayerController : Singleton<PlayerController>
     public string tagToCheckEnemy = "Enemy";
     public string tagToCheckEndLine = "EndLine";
 
+    public GameObject startScreen;
     public GameObject endScreen;
 
     public bool invencible = false;
@@ -40,9 +41,17 @@ public class PlayerController : Singleton<PlayerController>
 
     private void Start()
     {
-        
         _startPosition = transform.position;
         ResetSpeed();
+
+        if (GameManager.isRestarting)
+        {
+            GameManager.isRestarting = false;
+            if (startScreen != null) startScreen.SetActive(false);
+            StartToRun();
+
+        }
+
     }
 
 
