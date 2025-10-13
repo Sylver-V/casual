@@ -30,9 +30,13 @@ public class PlayerController : Singleton<PlayerController>
     private Vector3 _pos;
     private float _currentSpeed;
     private Vector3 _startPosition;
+    private float _baseSpeedToAnimation = 5;
 
     [Header("Coin Setup")]
     public GameObject coinCollector;
+
+    [Header("Animation")]
+    public AnimatorManager animatorManager;
 
     public void ChangeCoinCollectorSize(float amount)
     {
@@ -71,14 +75,21 @@ public class PlayerController : Singleton<PlayerController>
     {
         if (collision.transform.tag == tagToCheckEnemy)
         {
-            if(!invencible) EndGame();
+            MoveBack();
+            if (!invencible) EndGame(AnimatorManager.AnimationType.DEATH);
         }
     }
 
-    private void EndGame()
+    private void MoveBack()
+    {
+        transform.DOMoveZ(-1f, .3f).SetRelative();
+    }
+
+    private void EndGame(AnimatorManager.AnimationType animationType = AnimatorManager.AnimationType.IDLE)
     {
         _canRun = false;
         endScreen.SetActive(true);
+        animatorManager.Play(animationType);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -92,6 +103,7 @@ public class PlayerController : Singleton<PlayerController>
     public void StartToRun()
     {
         _canRun = true;
+        animatorManager.Play(AnimatorManager.AnimationType.RUN, _currentSpeed / _baseSpeedToAnimation);
     }
 
 
