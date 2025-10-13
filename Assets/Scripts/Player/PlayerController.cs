@@ -75,10 +75,14 @@ public class PlayerController : Singleton<PlayerController>
     {
         if (collision.transform.tag == tagToCheckEnemy)
         {
-            MoveBack();
-            if (!invencible) EndGame(AnimatorManager.AnimationType.DEATH);
+            if (!invencible)
+            {
+                MoveBack();
+                EndGame(AnimatorManager.AnimationType.DEATH);
+            }
         }
     }
+
 
     private void MoveBack()
     {
