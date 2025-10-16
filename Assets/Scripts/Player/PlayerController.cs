@@ -171,22 +171,25 @@ public class PlayerController : Singleton<PlayerController>
         {
             foreach (var mat in renderer.materials)
             {
-                Color c = mat.color;
-                c.a = active ? invencibleTranparence : 1f; // 50% transparente
-                mat.color = c;
+                if (mat.HasProperty("_Color"))
+                {
+                    Color c = mat.color;
+                    c.a = active ? invencibleTranparence : 1f;
+                    mat.color = c;
 
-                // Garante que o material suporte transparência
-                mat.SetFloat("_Mode", 2); // Fade
-                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                mat.SetInt("_ZWrite", 0);
-                mat.DisableKeyword("_ALPHATEST_ON");
-                mat.EnableKeyword("_ALPHABLEND_ON");
-                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                mat.renderQueue = 3000;
+                    mat.SetFloat("_Mode", 2);
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    mat.SetInt("_ZWrite", 0);
+                    mat.DisableKeyword("_ALPHATEST_ON");
+                    mat.EnableKeyword("_ALPHABLEND_ON");
+                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    mat.renderQueue = 3000;
+                }
             }
         }
     }
+
 
 
     #endregion
