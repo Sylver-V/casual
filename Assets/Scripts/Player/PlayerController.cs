@@ -37,6 +37,10 @@ public class PlayerController : Singleton<PlayerController>
 
     [Header("Animation")]
     public AnimatorManager animatorManager;
+    [SerializeField] private BounceHelper _bounceHelper;
+
+    [Header("PowerUpAnimation")]
+    public float invencibleTranparence = 0.5f;
 
     public void ChangeCoinCollectorSize(float amount)
     {
@@ -56,6 +60,12 @@ public class PlayerController : Singleton<PlayerController>
 
         }
 
+    }
+
+    public void Bounce()
+    {
+        if (_bounceHelper != null)
+        _bounceHelper.Bounce();
     }
 
 
@@ -98,11 +108,15 @@ public class PlayerController : Singleton<PlayerController>
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.transform.tag == tagToCheckEndLine)
+        if (other.transform.tag == tagToCheckEndLine)
         {
-            if(!invencible) EndGame();
+            EndGame(); // sempre finaliza a fase
+            return;
         }
+
+        // outras colisões podem ser ignoradas se invencível
     }
+
 
     public void StartToRun()
     {
@@ -150,6 +164,30 @@ public class PlayerController : Singleton<PlayerController>
 
         transform.DOMoveY(_startPosition.y, animationDuration);
     }
+
+    public void SetTransparency(bool active)
+    {
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        {
+            foreach (var mat in renderer.materials)
+            {
+                Color c = mat.color;
+                c.a = active ? invencibleTranparence : 1f; // 50% transparente
+                mat.color = c;
+
+                // Garante que o material suporte transparência
+                mat.SetFloat("_Mode", 2); // Fade
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_ZWrite", 0);
+                mat.DisableKeyword("_ALPHATEST_ON");
+                mat.EnableKeyword("_ALPHABLEND_ON");
+                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                mat.renderQueue = 3000;
+            }
+        }
+    }
+
 
     #endregion
 }

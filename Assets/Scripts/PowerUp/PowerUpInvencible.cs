@@ -9,12 +9,16 @@ public class PowerUpInvencible : PowerUpBase
         base.StartPowerUp();
         PlayerController.Instance.SetPowerUpText("Invencible");
         PlayerController.Instance.SetInvencible();
-    }
-    protected override void EndPowerUp()
-    {
-        base.StartPowerUp();
-        PlayerController.Instance.SetInvencible(false);
-        PlayerController.Instance.SetPowerUpText("");
+        PlayerController.Instance.SetTransparency(true);
     }
 
-} 
+    protected override void EndPowerUp()
+    {
+        base.EndPowerUp();
+        PlayerController.Instance.SetInvencible(false);
+        PlayerController.Instance.SetPowerUpText("");
+        PlayerController.Instance.SetTransparency(false);
+    }
+
+
+}

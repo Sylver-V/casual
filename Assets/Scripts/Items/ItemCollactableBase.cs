@@ -5,7 +5,7 @@ using UnityEngine;
 public class ItemCollactableBase : MonoBehaviour
 {
 
-    public string comparteTag = "Player";
+    public string compareTag = "Player";
     public ParticleSystem collectParticleSystem;
     public float timeToHide = 3;
     public GameObject graphicItem;
@@ -21,11 +21,15 @@ public class ItemCollactableBase : MonoBehaviour
 
     private void OnTriggerEnter(Collider collision)
     {
-        if (collision.transform.CompareTag(comparteTag))
+        Debug.Log($"[ItemCollactableBase] Colidiu com: {collision.name}");
+
+        if (collision.transform.CompareTag(compareTag))
         {
+            Debug.Log("[ItemCollactableBase] Tag bateu, coletando...");
             Collect();
         }
     }
+
 
 
 
@@ -44,8 +48,10 @@ public class ItemCollactableBase : MonoBehaviour
 
     protected virtual void OnCollect()
     {
+        Debug.Log("[ItemCollactableBase] OnCollect chamado");
         if (collectParticleSystem != null) collectParticleSystem.Play();
         if (audioSource != null && audioSource.clip != null)
             AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
     }
+
 }

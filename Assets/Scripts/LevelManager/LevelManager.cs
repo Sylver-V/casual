@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class LevelManager : MonoBehaviour
 {
@@ -22,13 +23,18 @@ public class LevelManager : MonoBehaviour
 
     public float timeBetweenPieces = .3f;
 
+    [Header("Animation")]
+    public float scaleDuration = .2f;
+    public float scaleTimeBetweenPieces = .1f;
+    public Ease ease = Ease.OutBack;
+
     [SerializeField] private int _index;
     private GameObject _currentLevel;
 
     private List<LevelPieceBase> _spawnedPieces = new List<LevelPieceBase>();
     private LevelPieceBaseSetup _currSetup;
 
-    private void Awake()
+    private void Start()
     {
         //SpawnNextLevel();
         CreateLevelPieces();
@@ -109,6 +115,26 @@ public class LevelManager : MonoBehaviour
         ColorManager.Instance.RandomizeColorsFromSetup(_currSetup.artType);
 
         //StartCoroutine(CreateLevelPiecesCoroutine());
+
+        StartCoroutine(ScalePiecesByTime());
+
+    }
+
+    IEnumerator ScalePiecesByTime()
+    {
+        foreach(var p in _spawnedPieces)
+        {
+            p.transform.localScale = Vector3.zero;
+        }
+
+        yield return null;
+
+        for (int i = 0; i < _spawnedPieces.Count; i++)
+        {
+            _spawnedPieces[i].transform.DOScale(1, scaleDuration).SetEase(ease);
+            yield return new WaitForSeconds(scaleTimeBetweenPieces);
+        }
+        CoinsAnimationManager.Instance.StartAnimation();
     }
 
     private void CreateLevelPiece(List<LevelPieceBase> list)
@@ -116,10 +142,9 @@ public class LevelManager : MonoBehaviour
         var piece = list[Random.Range(0, list.Count)];
         var spawnedPiece = Instantiate(piece, container);
 
-        if(_spawnedPieces.Count > 0)
+        if (_spawnedPieces.Count > 0)
         {
             var lastPiece = _spawnedPieces[_spawnedPieces.Count - 1];
-
             spawnedPiece.transform.position = lastPiece.endPiece.position;
         }
         else
@@ -127,13 +152,29 @@ public class LevelManager : MonoBehaviour
             spawnedPiece.transform.position = Vector3.zero;
         }
 
-            _spawnedPieces.Add(spawnedPiece);
+        _spawnedPieces.Add(spawnedPiece);
 
-        foreach(var p in spawnedPiece.GetComponentsInChildren<ArtPiece>())
+        foreach (var p in spawnedPiece.GetComponentsInChildren<ArtPiece>())
         {
             p.ChangePiece(ArtManager.Instance.GetSetupByType(_currSetup.artType).gameObject);
         }
+
+        foreach (var coin in spawnedPiece.GetComponentsInChildren<ItemCollactableCoin>(true))
+        {
+            if (coin != null && CoinsAnimationManager.Instance != null)
+            {
+                CoinsAnimationManager.Instance.RegisterCoin(coin);
+                coin.transform.localScale = Vector3.zero;
+            }
+            else
+            {
+                Debug.LogWarning("[LevelManager] Coin ou CoinsAnimationManager está nulo");
+            }
+        }
+
     }
+
+
 
     private void CleanSpawnedPieces()
     {

@@ -10,14 +10,27 @@ public class ItemCollactableCoin : ItemCollactableBase
     public float minDistance = 1f;
 
 
+    private void Start()
+    {
+        CoinsAnimationManager.Instance.RegisterCoin(this);
+    }
+
     protected override void OnCollect()
     {
         base.OnCollect();
+        Debug.Log("[ItemCollactableCoin] OnCollect da moeda chamado");
+
         colliderCoin.enabled = false;
         collect = true;
-        //PlayerController.Instance.Bounce();
-        //ItemManager.Instance.AddCoins();
+
+        if (PlayerController.Instance != null)
+        {
+            Debug.Log("[ItemCollactableCoin] Bounce chamado");
+            PlayerController.Instance.Bounce();
+        }
     }
+
+
 
     protected override void Collect()
     {
