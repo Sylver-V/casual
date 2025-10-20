@@ -49,7 +49,11 @@ public class ItemCollactableBase : MonoBehaviour
     protected virtual void OnCollect()
     {
         Debug.Log("[ItemCollactableBase] OnCollect chamado");
-        if (collectParticleSystem != null) collectParticleSystem.Play();
+        if (collectParticleSystem != null)
+        {
+            collectParticleSystem.transform.SetParent(null);
+            collectParticleSystem.Play();
+        }
         if (audioSource != null && audioSource.clip != null)
             AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
     }

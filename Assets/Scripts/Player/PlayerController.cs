@@ -39,6 +39,16 @@ public class PlayerController : Singleton<PlayerController>
     public AnimatorManager animatorManager;
     [SerializeField] private BounceHelper _bounceHelper;
 
+    [Header("VFX")]
+    public ParticleSystem vfxDeath;
+    public ParticleSystem vfxPowerUpSpeedUp;
+    public ParticleSystem vfxEndLineCelebration;
+
+    [Header("Limits")]
+    public float limit = 4;
+    public Vector2 limitVector = new Vector2(-4, 4);
+
+
     [Header("PowerUpAnimation")]
     public float invencibleTranparence = 0.5f;
 
@@ -59,7 +69,6 @@ public class PlayerController : Singleton<PlayerController>
             StartToRun();
 
         }
-
     }
 
     public void Bounce()
@@ -77,8 +86,13 @@ public class PlayerController : Singleton<PlayerController>
         _pos.y = transform.position.y;
         _pos.z = transform.position.z;
 
+
+        if (_pos.x < limitVector.x) _pos.x = limitVector.x;
+        else if (_pos.x > limitVector.y) _pos.x = limitVector.y;
+
         transform.position = Vector3.Lerp(transform.position, _pos, lerpSpeed * Time.deltaTime);
         transform.Translate(transform.forward * _currentSpeed * Time.deltaTime);
+
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -88,10 +102,11 @@ public class PlayerController : Singleton<PlayerController>
             if (!invencible)
             {
                 MoveBack();
-                EndGame(AnimatorManager.AnimationType.DEATH);
+                EndGame(AnimatorManager.AnimationType.DEATH, true);
             }
         }
     }
+
 
 
     private void MoveBack()
@@ -99,23 +114,37 @@ public class PlayerController : Singleton<PlayerController>
         transform.DOMoveZ(-1f, .3f).SetRelative();
     }
 
-    private void EndGame(AnimatorManager.AnimationType animationType = AnimatorManager.AnimationType.IDLE)
+    private void EndGame(AnimatorManager.AnimationType animationType = AnimatorManager.AnimationType.IDLE, bool isDeath = false)
     {
         _canRun = false;
         endScreen.SetActive(true);
         animatorManager.Play(animationType);
+
+        if (isDeath)
+        {
+            if (vfxDeath != null) vfxDeath.Play();
+        }
+        if (!isDeath)
+        {
+            if (vfxEndLineCelebration != null)
+            {
+                vfxEndLineCelebration.transform.position = transform.position; // garante que esteja no jogador
+                vfxEndLineCelebration.Play();
+            }
+        }
+
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform.tag == tagToCheckEndLine)
         {
-            EndGame(); // sempre finaliza a fase
+            EndGame(AnimatorManager.AnimationType.IDLE, false);
             return;
         }
-
-        // outras colisões podem ser ignoradas se invencível
     }
+
 
 
     public void StartToRun()
@@ -135,7 +164,13 @@ public class PlayerController : Singleton<PlayerController>
     public void PowerUpSpeedUp(float f)
     {
         _currentSpeed = f;
+
+        if (vfxPowerUpSpeedUp != null)
+        {
+            vfxPowerUpSpeedUp.Play();
+        }
     }
+
 
     public void ResetSpeed()
     {
@@ -162,6 +197,7 @@ public class PlayerController : Singleton<PlayerController>
         //p.y = _startPosition.y;
         //transform.position = p;
 
+        transform.DOMoveY(_startPosition.y, animationDuration);
         transform.DOMoveY(_startPosition.y, animationDuration);
     }
 
